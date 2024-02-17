@@ -50,3 +50,5 @@ class Trainer:
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                     print('Loss is: ', average_loss)
                 self.logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
+
+        self.logger.info('Fitting has been ended.')
