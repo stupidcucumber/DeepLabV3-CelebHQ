@@ -7,9 +7,7 @@ class SemanticDataset(Dataset):
     def __init__(self, df_path: str, seed: int | None = None) -> None:
         super().__init__()
         self.seed = seed
-        data = pd.read_csv(df_path)
-
-        self.data = data.sample(frac=1).reset_index()
+        self.data = pd.read_csv(df_path)
 
     def __len__(self):
         return len(self.data)
