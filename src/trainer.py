@@ -48,5 +48,5 @@ class Trainer:
                     loss = self.val_step(logits=logits, labels=labels)
                     losses.append(loss)
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
-                    print('Loss is: ', )
+                    print('Loss is: ', average_loss)
                 self.logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
