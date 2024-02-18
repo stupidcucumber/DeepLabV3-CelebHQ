@@ -20,6 +20,7 @@ class SemanticDataset(Dataset):
     
     def _construct_label(self, paths) -> list:
         result = []
+        background = np.full(shape=(512, 512), fill_value=1, dtype=np.uint8)
         for path in paths:
             if pd.isna(path):
                 dummy = np.full(shape=(512, 512), fill_value=0, dtype=np.int32)
@@ -28,12 +29,14 @@ class SemanticDataset(Dataset):
             raw_image = cv2.imread(str(path))
             raw_image = cv2.cvtColor(raw_image, cv2.COLOR_BGR2GRAY)
             _, thresh = cv2.threshold(raw_image, thresh=127, maxval=1, type=cv2.THRESH_BINARY)
+            background -= np.asarray(thresh)
             result.append(thresh)
+        result[0] = background
         return result
 
     def __getitem__(self, index: int):
         entry = self.data.loc[index]
-        image = Image.open(entry['image_path'])
+        image = cv2.imread(entry['image_path'])
         input = self.transforms(image)
         mask_paths = entry.tolist()[1:]
         label = np.asarray([self.totensor(image) for image in self._construct_label(paths=mask_paths)])
