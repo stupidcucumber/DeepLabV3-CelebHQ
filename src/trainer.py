@@ -6,7 +6,7 @@ import logging
 
 class Trainer:
     def __init__(self, model: Module, 
-                 loss_fn: function,
+                 loss_fn,
                  optimizer: torch.optim.Optimizer,
                  logger: logging.Logger):
         self.model = model

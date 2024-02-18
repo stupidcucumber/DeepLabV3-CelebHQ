@@ -1,8 +1,12 @@
 import logging, logging.config
 import pathlib, json, argparse
 from src.utils import create_model
+from src.data import SemanticDataset
 from src import Trainer
 import torch
+from torchvision import transforms
+import pandas as pd
+from torch.utils.data import DataLoader
 
 
 logger = logging.getLogger('training_logger')
@@ -20,9 +24,13 @@ def setup_logging():
 
 def parse_configs():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--output-channels', type=int, default=18)
+    parser.add_argument('--data', type=str, required=True,
+                        help='Path to the dataframe that represents data. More in datasets/README.md')
+    parser.add_argument('--output-channels', type=int, default=19)
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch-size', type=int, default=32)
+    parser.add_argument('--tv-split', type=float, default=0.90,
+                        help='Train-validation split, that defines the size of the train part.')
     args = parser.parse_args()
     logger.info(
         'Parsed arguments.', 
@@ -38,14 +46,34 @@ if __name__ == '__main__':
 
     optimizer = torch.optim.Adam(params=model.parameters())
     loss_fn = torch.nn.CrossEntropyLoss()
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            ),
+            transforms.Resize(size=(512, 512))
+        ]
+    )
 
     trainer = Trainer(model=model, 
                       loss_fn=loss_fn, 
                       optimizer=optimizer, 
                       logger=logger)
 
+    data = pd.read_csv(args.data)
+    split_index = int(len(data) * args.ts_split)
+    train_data = data[:split_index].reset_index()
+    val_data = data[split_index:].reset_index()
+    train_dataset = SemanticDataset(
+        df=train_data,
+        seed=0,
+        transforms=transform
+    )
+
     trainer.fit(
-        train_loader=None,
-        val_loader=None,
+        train_loader=DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True),
+        val_loader=DataLoader(dataset=val_data, batch_size=args.batch_size),
         epochs=args.epochs
     )
