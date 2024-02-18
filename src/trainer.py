@@ -20,7 +20,7 @@ class Trainer:
         loss = self.loss_fn(logits, labels)
         loss.backward()
         self.optimizer.step()
-        return loss.numpy()
+        return loss
 
     def val_step(self, logits, labels) -> float:
         self.model.eval()
@@ -31,10 +31,10 @@ class Trainer:
                  epochs: int):
         self.logger.info('Start fitting the model.')
 
-        for epoch in epochs:
+        for epoch in range(epochs):
             losses = []
             for inputs, labels in train_loader:
-                logits = self.model(inputs)
+                logits = self.model(inputs)['out'].float()
                 loss = self.train_step(logits=logits, labels=labels)
                 losses.append(loss)
                 average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))

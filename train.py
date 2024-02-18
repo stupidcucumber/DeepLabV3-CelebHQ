@@ -44,8 +44,8 @@ if __name__ == '__main__':
     args = parse_configs()
     model = create_model(output_channels=args.output_channels)
 
-    optimizer = torch.optim.Adam(params=model.parameters())
-    loss_fn = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=0.001)
+    loss_fn = torch.nn.MSELoss()
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -63,17 +63,23 @@ if __name__ == '__main__':
                       logger=logger)
 
     data = pd.read_csv(args.data)
-    split_index = int(len(data) * args.ts_split)
-    train_data = data[:split_index].reset_index()
-    val_data = data[split_index:].reset_index()
+    split_index = int(len(data) * args.tv_split)
+    train_data = data.iloc[:split_index].reset_index(drop=True)
+    val_data = data.iloc[split_index:].reset_index(drop=True)
     train_dataset = SemanticDataset(
         df=train_data,
         seed=0,
         transforms=transform
     )
+    val_dataset = SemanticDataset(
+        df=val_data,
+        seed=0,
+        transforms=transform
+    )
+    logger.info('Loaded all datasets.')
 
     trainer.fit(
-        train_loader=DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True),
-        val_loader=DataLoader(dataset=val_data, batch_size=args.batch_size),
+        train_loader=DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True),
+        val_loader=DataLoader(dataset=val_dataset, batch_size=args.batch_size),
         epochs=args.epochs
     )

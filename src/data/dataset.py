@@ -32,11 +32,10 @@ class SemanticDataset(Dataset):
         return result
 
     def __getitem__(self, index: int):
-        entry = self.data.iloc[index]
+        entry = self.data.loc[index]
         image = Image.open(entry['image_path'])
-        print(entry['image_path'])
         input = self.transforms(image)
         mask_paths = entry.tolist()[1:]
         label = np.asarray([self.totensor(image) for image in self._construct_label(paths=mask_paths)])
 
-        return input, torch.as_tensor(label).squeeze(dim=1)
+        return input, torch.as_tensor(label, dtype=torch.float).squeeze(dim=1)
