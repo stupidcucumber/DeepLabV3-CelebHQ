@@ -3,6 +3,9 @@ import numpy as np
 
 
 class MeanEvaluator:
+    '''
+        
+    '''
     def __init__(self, name: str):
         super(MeanEvaluator, self).__init__()
         self.name = name
