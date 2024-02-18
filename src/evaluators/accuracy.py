@@ -5,15 +5,17 @@ from ..utils import decode
 
 
 class AccuracyMeanEvaluator(MeanEvaluator):
-    def __init__(self, name: str):
-        super(AccuracyMeanEvaluator, self).__init__(name=name)
+    def __init__(self, name: str = 'accuracy', mapping: dict | None = None):
+        super(AccuracyMeanEvaluator, self).__init__(name=name, mapping=mapping)
     
     def _calculate_accuracy_layer(self, layer_predicted, layer_true) -> np.float32:
         _mp = np.multiply(layer_predicted, layer_true)
-        intersection = np.sum(_mp)
+        intersection = np.sum(_mp.numpy())
         union = np.sum(np.asarray([layer_predicted, layer_true])) - intersection
-        accuracy = intersection / union
-        return accuracy
+        if union > 0:
+            accuracy = intersection / union
+            return accuracy
+        return 0
 
     def calculate_value(self, logits: Tensor, labels: Tensor) -> dict | np.float32:
         _batch_num, _layer_num = logits.shape[:2]

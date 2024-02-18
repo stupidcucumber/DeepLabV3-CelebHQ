@@ -2,6 +2,7 @@ import logging, logging.config
 import pathlib, json, argparse
 from src.utils import create_model
 from src.data import SemanticDataset
+from src.evaluators import AccuracyMeanEvaluator
 from src import Trainer
 import torch
 from torchvision import transforms
@@ -31,7 +32,12 @@ def parse_configs():
     parser.add_argument('--batch-size', type=int, default=32)
     parser.add_argument('--tv-split', type=float, default=0.90,
                         help='Train-validation split, that defines the size of the train part.')
+    parser.add_argument('--mapping', type=str, default='configs/mapping.json',
+                        help='Path to the mapping of the layer: index in json format')
     args = parser.parse_args()
+    if args.mapping:
+        with open(args.mapping, 'r') as _mapping:
+            args.mapping = {int(key): value for key, value in json.load(_mapping, parse_int=int).items()}
     logger.info(
         'Parsed arguments.', 
         extra={key: value for key, value in args._get_kwargs()}
@@ -56,11 +62,16 @@ if __name__ == '__main__':
             transforms.Resize(size=(512, 512))
         ]
     )
+    evaluators = [
+        AccuracyMeanEvaluator(name='accuracy',
+                              mapping=args.mapping)
+    ]
 
     trainer = Trainer(model=model, 
                       loss_fn=loss_fn, 
                       optimizer=optimizer, 
-                      logger=logger)
+                      logger=logger,
+                      evaluators=evaluators)
 
     data = pd.read_csv(args.data)
     split_index = int(len(data) * args.tv_split)
