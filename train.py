@@ -51,7 +51,7 @@ if __name__ == '__main__':
     model = create_model(output_channels=args.output_channels)
 
     optimizer = torch.optim.Adam(params=model.parameters(), lr=0.001)
-    loss_fn = torch.nn.MSELoss()
+    loss_fn = torch.nn.CrossEntropyLoss()
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
