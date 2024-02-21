@@ -12,7 +12,7 @@ class AccuracyMeanEvaluator(MeanEvaluator):
     def _calculate_accuracy_layer(self, index: int, layer_predicted, layer_true) -> np.float32:
         intersection = torch.sum(layer_predicted[layer_true == index])
         union = torch.sum(layer_predicted == 1) + torch.sum(layer_true == index)
-        if union > 0:
+        if torch.sum(layer_true == index) > 0:
             accuracy = intersection / union
             return accuracy
         return 1.0
