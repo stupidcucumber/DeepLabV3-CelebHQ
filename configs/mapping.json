@@ -1,1 +1,21 @@
-{"0": "background", "1": "skin", "2": "nose", "3": "eye_g", "4": "l_eye", "5": "r_eye", "6": "l_brow", "7": "r_brow", "8": "l_ear", "9": "r_ear", "10": "mouth", "11": "u_lip", "12": "l_lip", "13": "hair", "14": "hat", "15": "ear_r", "16": "neck_l", "17": "neck", "18": "cloth"}
+{
+    "0": "background",
+    "1": "neck",
+    "2": "neck_l",
+    "3": "cloth",
+    "4": "skin",
+    "5": "l_eye",
+    "6": "r_eye",
+    "7": "l_brow",
+    "8": "r_brow",
+    "9": "l_ear",
+    "10": "r_ear",
+    "11": "nose",
+    "12": "mouth",
+    "13": "u_lip",
+    "14": "l_lip",
+    "15": "ear_r",
+    "16": "eye_g",
+    "17": "hair",
+    "18": "hat"
+}
