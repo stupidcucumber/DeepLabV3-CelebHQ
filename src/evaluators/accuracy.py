@@ -15,7 +15,7 @@ class AccuracyMeanEvaluator(MeanEvaluator):
         if union > 0:
             accuracy = intersection / union
             return accuracy
-        return 0
+        return 1.0
 
     def calculate_value(self, logits: Tensor, labels: Tensor) -> dict | np.float32:
         _batch_num, _layer_num = logits.shape[:2]
