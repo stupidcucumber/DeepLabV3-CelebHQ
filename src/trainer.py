@@ -54,10 +54,10 @@ class Trainer:
                 loss = self.train_step(logits=logits, labels=labels)
                 losses.append(loss)
                 average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
-                print('Loss is: ', average_loss)
+                print('Loss is: ', average_loss, flush=True)
                 for evaluator in self.evaluators:
                     evaluator.append(logits=logits, labels=labels)
-                    print('Results of %s' % evaluator.name, evaluator.get_result())
+                    print('Results of %s' % evaluator.name, evaluator.get_result(), flush=True)
                     data['extra_train'][evaluator.name] = evaluator.get_result()
             self.logger.info('training', extra={'epoch': epoch, 'average_loss': average_loss})
             data['train_loss'] = average_loss
@@ -69,10 +69,10 @@ class Trainer:
                     loss = self.val_step(logits=logits, labels=labels)
                     losses.append(loss)
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
-                    print('Loss is: ', average_loss)
+                    print('Loss is: ', average_loss, flush=True)
                     for evaluator in self.evaluators:
                         evaluator.append(logits=logits, labels=labels)
-                        print('Results of %s' % evaluator.name, evaluator.get_result())
+                        print('Results of %s' % evaluator.name, evaluator.get_result(), flush=True)
                         data['extra_val'][evaluator.name] = evaluator.get_result()
                 self.logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
                 data['val_loss'] = average_loss

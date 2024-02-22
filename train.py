@@ -3,6 +3,7 @@ import pathlib, json, argparse
 from src.utils import create_model
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
+from src.callback import BestWeightsCallback
 from src import Trainer
 import torch
 from torchvision import transforms
@@ -65,6 +66,11 @@ if __name__ == '__main__':
     evaluators = [
         AccuracyMeanEvaluator(name='accuracy',
                               mapping=args.mapping)
+    ]
+    callbacks = [
+        BestWeightsCallback(
+            output=pathlib.Path('runs')
+        )
     ]
 
     trainer = Trainer(model=model, 
