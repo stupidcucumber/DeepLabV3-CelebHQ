@@ -54,7 +54,7 @@ def parse_configs():
                         help='Path to the dataframe that represents data. More in datasets/README.md')
     parser.add_argument('--output-channels', type=int, default=19)
     parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--batch-size', type=int, default=1)
+    parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--tv-split', type=float, default=0.90,
                         help='Train-validation split, that defines the size of the train part.')
     parser.add_argument('--mapping', type=str, required=True,
@@ -102,7 +102,8 @@ if __name__ == '__main__':
                       loss_fn=loss_fn, 
                       optimizer=optimizer, 
                       logger=logger,
-                      evaluators=evaluators)
+                      evaluators=evaluators,
+                      callbacks=callbacks)
 
     data = pd.read_csv(args.data)
     split_index = int(len(data) * args.tv_split)
