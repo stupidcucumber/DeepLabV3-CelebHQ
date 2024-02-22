@@ -25,6 +25,7 @@ def setup_logging():
 
 
 def setup_data(url: str):
+    logger.info('Downloading data...')
     datasets_root = pathlib.Path('datasets')
     dataset_folder = datasets_root.joinpath('CelebAMask-HQ')
     dataset_zipfile = datasets_root.joinpath('CelebAMask-HQ.zip')
@@ -36,10 +37,15 @@ def setup_data(url: str):
             use_cookies=False,
             quiet=True
         )
+    else:
+        logger.info('Exisiting zipfile is used.')
 
     if not dataset_folder.exists():
         with zipfile.ZipFile(str(dataset_zipfile)) as zip:
             zip.extractall(path=dataset_folder)
+    else:
+        logger.info('Detected existing dataset. Loading it...')
+    logger.info('Data loading ended.')
 
 
 def parse_configs():
@@ -66,7 +72,7 @@ def parse_configs():
 
 if __name__ == '__main__':
     setup_logging()
-    setup_data(url='https://drive.google.com/uc?id=10zKsYI3xtrtyIthFDU5NmPfucwnMj-rf')
+    setup_data(url='https://drive.google.com/uc?id=17e_IRjSuise59WUDHVrwZKES71KzJ9bU')
     args = parse_configs()
     model = create_model(output_channels=args.output_channels)
 
