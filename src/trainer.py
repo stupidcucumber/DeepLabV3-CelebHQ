@@ -21,6 +21,9 @@ class Trainer:
         self.callbacks = callbacks
         self.device = device
 
+    def _move_to_device(self, inputs: torch.Tensor, labels: torch.Tensor) -> list[torch.Tensor, torch.Tensor]:
+        return inputs.to(self.device), labels.to(self.device)
+
     def train_step(self, logits, labels) -> float:
         self.model.train()
         self.optimizer.zero_grad()
@@ -51,8 +54,7 @@ class Trainer:
                 callback.epoch_start(data=data)
 
             for inputs, labels in train_loader:
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device) 
+                inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
                 logits = self.model(inputs)['out'].float()
                 loss = self.train_step(logits=logits, labels=labels)
                 losses.append(loss)
@@ -68,8 +70,7 @@ class Trainer:
             losses.clear()
             with torch.no_grad():
                 for inputs, labels in val_loader:
-                    inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
+                    inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
                     logits = self.model(inputs)['out'].float()
                     loss = self.val_step(logits=logits, labels=labels)
                     losses.append(loss)
