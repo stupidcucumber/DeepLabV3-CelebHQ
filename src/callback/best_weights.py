@@ -19,7 +19,7 @@ class BestWeightsCallback(Callback):
     def epoch_end(self, data: Any) -> None:
         mAP = self._calculate_mAP(accuracies=data['extra_val']['accuracy'])
         if self.last_best_accuracy is None \
-            or self.last_best_accuracy > mAP:
+            or self.last_best_accuracy <= mAP:
             self.last_best_accuracy = mAP
             weights_path = self.output.joinpath('best_weights.pt')
             model = data['model']
