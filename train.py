@@ -1,6 +1,6 @@
 import logging, logging.config
 import pathlib, json, argparse, gdown, zipfile, sys
-from src.utils import create_model, setup_data, setup_logging
+from src.utils import create_model, setup_data, setup_logging, seed_everything
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
 from src.callback import BestWeightsCallback
@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 
 
 logger = logging.getLogger('train_script')
+
 
 def parse_configs():
     parser = argparse.ArgumentParser()
@@ -40,6 +41,7 @@ def parse_configs():
 if __name__ == '__main__':
     setup_logging()
     setup_data(url='https://drive.google.com/uc?id=17e_IRjSuise59WUDHVrwZKES71KzJ9bU')
+    seed_everything(seed=0)
     args = parse_configs()
     model = create_model(output_channels=args.output_channels).to(args.device)
 

@@ -1,7 +1,8 @@
 import logging
 import logging.config
-import pathlib, gdown, zipfile, json
+import pathlib, gdown, zipfile, json, random
 import torch
+import numpy as np
 from torchvision import models
 from torchvision.models.segmentation.deeplabv3 import DeepLabHead
 from torchvision.models.segmentation.deeplabv3 import DeepLabV3_ResNet101_Weights
@@ -46,8 +47,6 @@ def setup_data(url: str):
     logger.info('Data loading ended.')
 
 
-
-
 def setup_logging():
     logging_directory = pathlib.Path('logs')
     if not logging_directory.exists():
@@ -56,3 +55,9 @@ def setup_logging():
     with config_path.open() as config_file:
         config = json.load(config_file)
     logging.config.dictConfig(config=config)
+
+
+def seed_everything(seed: int = 0):
+    np.random.seed(seed=seed)
+    torch.manual_seed(seed=seed)
+    random.seed(seed)
