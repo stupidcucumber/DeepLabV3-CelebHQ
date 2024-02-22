@@ -55,7 +55,6 @@ class Trainer:
                 labels = labels.to(self.device) 
                 logits = self.model(inputs)['out'].float()
                 loss = self.train_step(logits=logits, labels=labels)
-                logits = logits.cpu()
                 losses.append(loss)
                 average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                 print('Loss is: ', average_loss, flush=True)
@@ -73,8 +72,6 @@ class Trainer:
                     labels = labels.to(self.device)
                     logits = self.model(inputs)['out'].float()
                     loss = self.val_step(logits=logits, labels=labels)
-
-                    logits = logits.cpu()
                     losses.append(loss)
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                     print('Loss is: ', average_loss, flush=True)
