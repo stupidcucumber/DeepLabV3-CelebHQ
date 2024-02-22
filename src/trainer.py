@@ -27,14 +27,18 @@ class Trainer:
     def train_step(self, logits, labels) -> float:
         self.model.train()
         self.optimizer.zero_grad()
-        loss = self.loss_fn(logits, labels)
+        loss_1 = self.loss_fn(logits['out'], labels)
+        loss_2 = self.loss_fn(logits['aux'], labels)
+        loss = loss_1 + loss_2
         loss.backward()
         self.optimizer.step()
         return loss
 
     def val_step(self, logits, labels) -> float:
         self.model.eval()
-        loss = self.loss_fn(logits, labels)
+        loss_1 = self.loss_fn(logits['out'], labels)
+        loss_2 = self.loss_fn(logits['aux'], labels)
+        loss = loss_1 + loss_2
         return loss
 
     def fit(self, train_loader: DataLoader, val_loader: DataLoader,
@@ -55,8 +59,9 @@ class Trainer:
 
             for inputs, labels in train_loader:
                 inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
-                logits = self.model(inputs)['out'].float()
-                loss = self.train_step(logits=logits, labels=labels)
+                output = self.model(inputs)
+                loss = self.train_step(logits=output, labels=labels)
+                logits = output['out'].float()
                 losses.append(loss)
                 average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                 print('Loss is: ', average_loss, flush=True)
@@ -71,8 +76,9 @@ class Trainer:
             with torch.no_grad():
                 for inputs, labels in val_loader:
                     inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
-                    logits = self.model(inputs)['out'].float()
-                    loss = self.val_step(logits=logits, labels=labels)
+                    output = self.model(inputs)['out'].float()
+                    loss = self.val_step(logits=output, labels=labels)
+                    logits = output['out'].float()
                     losses.append(loss)
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                     print('Loss is: ', average_loss, flush=True)
