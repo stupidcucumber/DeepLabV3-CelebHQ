@@ -7,4 +7,4 @@ RUN pip3 install --no-cache -r requirements.txt
 
 COPY . ./
 
-ENTRYPOINT ["python", "train.py", "--data" , "celeb_fixed.csv", "--epochs", "20", "--batch-size", "16", "--mapping", "configs/mapping.json"]
+ENTRYPOINT ["python", "train.py", "--data" , "datasets/CelebAMask-HQ-1/celeb.csv", "--epochs", "20", "--batch-size", "16", "--mapping", "datasets/CelebAMask-HQ-1/mapping.json"]

@@ -1,5 +1,5 @@
 import logging, logging.config
-import pathlib, json, argparse
+import pathlib, json, argparse, gdown, zipfile
 from src.utils import create_model
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
@@ -24,6 +24,16 @@ def setup_logging():
     logging.config.dictConfig(config=config)
 
 
+def setup_data():
+    datasets_root = pathlib.Path('datasets')
+    dataset_folder = datasets_root.joinpath('CelebAMask-HQ')
+    if not dataset_folder.exists():
+        dataset_folder.mkdir()
+        gdown.download(url='', output=str(datasets_root))
+        with zipfile.ZipFile(str(datasets_root.joinpath('CelebAMask-HQ.zip'))) as zip:
+            zip.extractall(path=str(dataset_folder))
+
+
 def parse_configs():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, required=True,
@@ -33,7 +43,7 @@ def parse_configs():
     parser.add_argument('--batch-size', type=int, default=32)
     parser.add_argument('--tv-split', type=float, default=0.90,
                         help='Train-validation split, that defines the size of the train part.')
-    parser.add_argument('--mapping', type=str, default='configs/mapping.json',
+    parser.add_argument('--mapping', type=str, required=True,
                         help='Path to the mapping of the layer: index in json format')
     args = parser.parse_args()
     if args.mapping:
@@ -48,6 +58,7 @@ def parse_configs():
 
 if __name__ == '__main__':
     setup_logging()
+    setup_data()
     args = parse_configs()
     model = create_model(output_channels=args.output_channels)
 
