@@ -59,6 +59,8 @@ def parse_configs():
                         help='Train-validation split, that defines the size of the train part.')
     parser.add_argument('--mapping', type=str, required=True,
                         help='Path to the mapping of the layer: index in json format')
+    parser.add_argument('-d', '--device', type=str, default='cpu',
+                        help='The device on which model will train.')
     args = parser.parse_args()
     if args.mapping:
         with open(args.mapping, 'r') as _mapping:
@@ -74,7 +76,7 @@ if __name__ == '__main__':
     setup_logging()
     setup_data(url='https://drive.google.com/uc?id=17e_IRjSuise59WUDHVrwZKES71KzJ9bU')
     args = parse_configs()
-    model = create_model(output_channels=args.output_channels)
+    model = create_model(output_channels=args.output_channels).to(args.device)
 
     optimizer = torch.optim.Adam(params=model.parameters(), lr=0.001)
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -103,7 +105,8 @@ if __name__ == '__main__':
                       optimizer=optimizer, 
                       logger=logger,
                       evaluators=evaluators,
-                      callbacks=callbacks)
+                      callbacks=callbacks,
+                      device=args.device)
 
     data = pd.read_csv(args.data)
     split_index = int(len(data) * args.tv_split)

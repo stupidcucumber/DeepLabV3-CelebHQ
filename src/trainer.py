@@ -12,13 +12,15 @@ class Trainer:
                  optimizer: torch.optim.Optimizer,
                  logger: logging.Logger,
                  evaluators: list[MeanEvaluator],
-                 callbacks: list[Callback]):
+                 callbacks: list[Callback],
+                 device: str = 'cpu'):
         self.model = model
         self.logger = logger
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.evaluators = evaluators
         self.callbacks = callbacks
+        self.device = device
 
     def train_step(self, logits, labels) -> float:
         self.model.train()
@@ -50,8 +52,11 @@ class Trainer:
                 callback.epoch_start(data=data)
 
             for inputs, labels in train_loader:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device) 
                 logits = self.model(inputs)['out'].float()
                 loss = self.train_step(logits=logits, labels=labels)
+                logits = logits.cpu()
                 losses.append(loss)
                 average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                 print('Loss is: ', average_loss, flush=True)
@@ -65,8 +70,12 @@ class Trainer:
             losses.clear()
             with torch.no_grad():
                 for inputs, labels in val_loader:
-                    logits = self.model(inputs)
+                    inputs = inputs.to(self.device)
+                    labels = labels.to(self.device)
+                    logits = self.model(inputs)['out'].float()
                     loss = self.val_step(logits=logits, labels=labels)
+
+                    logits = logits.cpu()
                     losses.append(loss)
                     average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
                     print('Loss is: ', average_loss, flush=True)
