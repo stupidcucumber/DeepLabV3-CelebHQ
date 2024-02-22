@@ -1,6 +1,6 @@
 import logging, logging.config
 import pathlib, json, argparse, gdown, zipfile, sys
-from src.utils import create_model
+from src.utils import create_model, setup_data, setup_logging
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
 from src.callback import BestWeightsCallback
@@ -11,42 +11,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 
 
-logger = logging.getLogger('training_logger')
-
-
-def setup_logging():
-    logging_directory = pathlib.Path('logs')
-    if not logging_directory.exists():
-        logging_directory.mkdir()
-    config_path = pathlib.Path('src/logger/config.json')
-    with config_path.open() as config_file:
-        config = json.load(config_file)
-    logging.config.dictConfig(config=config)
-
-
-def setup_data(url: str):
-    logger.info('Downloading data...')
-    datasets_root = pathlib.Path('datasets')
-    dataset_folder = datasets_root.joinpath('CelebAMask-HQ')
-    dataset_zipfile = datasets_root.joinpath('CelebAMask-HQ.zip')
-    
-    if not dataset_zipfile.exists():
-        gdown.download(
-            url=url, 
-            output=str(dataset_zipfile),
-            use_cookies=False,
-            quiet=True
-        )
-    else:
-        logger.info('Exisiting zipfile is used.')
-
-    if not dataset_folder.exists():
-        with zipfile.ZipFile(str(dataset_zipfile)) as zip:
-            zip.extractall(path=dataset_folder)
-    else:
-        logger.info('Detected existing dataset. Loading it...')
-    logger.info('Data loading ended.')
-
+logger = logging.getLogger('train_script')
 
 def parse_configs():
     parser = argparse.ArgumentParser()
@@ -102,8 +67,7 @@ if __name__ == '__main__':
 
     trainer = Trainer(model=model, 
                       loss_fn=loss_fn, 
-                      optimizer=optimizer, 
-                      logger=logger,
+                      optimizer=optimizer,
                       evaluators=evaluators,
                       callbacks=callbacks,
                       device=args.device)
