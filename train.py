@@ -1,5 +1,5 @@
 import logging, logging.config
-import pathlib, json, argparse, gdown, zipfile
+import pathlib, json, argparse, gdown, zipfile, sys
 from src.utils import create_model
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
@@ -24,14 +24,22 @@ def setup_logging():
     logging.config.dictConfig(config=config)
 
 
-def setup_data():
+def setup_data(url: str):
     datasets_root = pathlib.Path('datasets')
     dataset_folder = datasets_root.joinpath('CelebAMask-HQ')
+    dataset_zipfile = datasets_root.joinpath('CelebAMask-HQ.zip')
+    
+    if not dataset_zipfile.exists():
+        gdown.download(
+            url=url, 
+            output=str(dataset_zipfile),
+            use_cookies=False,
+            quiet=True
+        )
+
     if not dataset_folder.exists():
-        dataset_folder.mkdir()
-        gdown.download(url='', output=str(datasets_root))
-        with zipfile.ZipFile(str(datasets_root.joinpath('CelebAMask-HQ.zip'))) as zip:
-            zip.extractall(path=str(dataset_folder))
+        with zipfile.ZipFile(str(dataset_zipfile)) as zip:
+            zip.extractall(path=dataset_folder)
 
 
 def parse_configs():
@@ -40,7 +48,7 @@ def parse_configs():
                         help='Path to the dataframe that represents data. More in datasets/README.md')
     parser.add_argument('--output-channels', type=int, default=19)
     parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--batch-size', type=int, default=32)
+    parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--tv-split', type=float, default=0.90,
                         help='Train-validation split, that defines the size of the train part.')
     parser.add_argument('--mapping', type=str, required=True,
@@ -58,7 +66,7 @@ def parse_configs():
 
 if __name__ == '__main__':
     setup_logging()
-    setup_data()
+    setup_data(url='https://drive.google.com/uc?id=10zKsYI3xtrtyIthFDU5NmPfucwnMj-rf')
     args = parse_configs()
     model = create_model(output_channels=args.output_channels)
 

@@ -4,7 +4,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - logs:/app/logs
+      - datasets:/app/datasets
+      - runs:/app/runs
     deploy:
       resources:
         reservations:
@@ -14,9 +15,15 @@ services:
               capabilities: [gpu]
 
 volumes:
-  logs:
+  datasets:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "$PWD/logs"
+      device: "$PWD/datasets"
+  runs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$PWD/runs"
