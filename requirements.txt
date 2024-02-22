@@ -3,4 +3,4 @@ torchvision
 numpy
 pandas
 opencv-python
-opencv-python-contrib
+opencv-contrib-python
