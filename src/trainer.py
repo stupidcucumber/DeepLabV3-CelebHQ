@@ -72,16 +72,13 @@ class Trainer:
             'extra_val' : dict()
         }
         for epoch in range(epochs):
-            losses = []
-
             for callback in self.callbacks:
                 callback.epoch_start(data=data)
             
             average_loss = self._compute_epoch(data=data, loader=train_loader, partition='train')
             logger.info('training', extra={'epoch': epoch, 'average_loss': average_loss})
             data['train_loss'] = average_loss
-
-            losses.clear()
+            
             with torch.no_grad():
                 average_loss = self._compute_epoch(data=data, loader=val_loader, partition='val')
                 logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
