@@ -29,7 +29,7 @@
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "json",
-            "filename": "logs/train.log.jsonl",
+            "filename": "logs/application/train.log.jsonl",
             "maxBytes": 100000,
             "backupCount": 3
         }

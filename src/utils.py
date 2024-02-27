@@ -48,9 +48,9 @@ def setup_data(url: str):
 
 
 def setup_logging():
-    logging_directory = pathlib.Path('logs')
+    logging_directory = pathlib.Path('logs', 'application')
     if not logging_directory.exists():
-        logging_directory.mkdir()
+        logging_directory.mkdir(parents=True)
     config_path = pathlib.Path('src/logger/config.json')
     with config_path.open() as config_file:
         config = json.load(config_file)
