@@ -7,7 +7,4 @@ class Callback:
 
     def epoch_end(self, data: Any) -> None:
         pass
-
-    def run(self, data: Any) -> None:
-        self.epoch_start(data=data)
-        self.epoch_end(data=data)
+    
