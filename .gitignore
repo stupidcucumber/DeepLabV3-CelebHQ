@@ -1,6 +1,7 @@
 **/__pycache__
 **/.DS_Store
-**/logs
+**/logs/application
+**/logs/tensorboard
 *.csv
 datasets/*
 test*.ipynb
