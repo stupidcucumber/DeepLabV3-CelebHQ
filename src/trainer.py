@@ -50,6 +50,8 @@ class Trainer:
     def _compute_epoch(self, data: dict, loader: DataLoader, partition: str = 'train'):
         losses = []
         for inputs, labels in loader:
+            for callback in self.callbacks:
+                callback.batch_start(data=data)
             inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
             output = self.model(inputs)
             loss = self._train_step(logits=output, labels=labels) if partition == 'train' \
@@ -57,15 +59,17 @@ class Trainer:
             logits = output['out'].float()
             losses.append(loss)
             average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
+            data['%s_loss' % partition] = loss
             print('Loss is: ', average_loss, flush=True)
             self._evaluate(data=data, logits=logits, labels=labels, partition=partition)
+            for callback in self.callbacks:
+                callback.batch_end(data=data)
         return average_loss
 
     def fit(self, train_loader: DataLoader, val_loader: DataLoader,
                  epochs: int):
         logger.info('Start fitting the model.')
         data = {
-            'model': self.model,
             'train_loss': 0,
             'val_loss': 0,
             'extra_train': dict(),

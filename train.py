@@ -3,7 +3,7 @@ import pathlib, json, argparse, gdown, zipfile, sys
 from src.utils import create_model, setup_data, setup_logging, seed_everything
 from src.data import SemanticDataset
 from src.evaluators import AccuracyMeanEvaluator
-from src.callback import BestWeightsCallback
+from src.callback import BestWeightsCallback, TensorboardCallback
 from src import Trainer
 import torch
 from torchvision import transforms
@@ -64,6 +64,9 @@ if __name__ == '__main__':
     callbacks = [
         BestWeightsCallback(
             output=pathlib.Path('runs')
+        ),
+        TensorboardCallback(
+            log_dir= pathlib.Path('logs', 'tensorboard')
         )
     ]
 
