@@ -29,12 +29,12 @@ After starting the training CelebAMask-HQ dataset will be automatically download
 ## Evaluation
 TBD
 
-# TODO
+# :warning: TODO :warning:
 This list will be updated throughout the time. Contributions are hugely appreciated!
 
 Task name | Progress |
 ----------|----------|
-Implement Tensorboard logging|:white_square_button:|
+Implement Tensorboard logging|:white_check_mark:|
 Implement callback for precision|:white_square_button:|
 Implement callback for recall|:white_square_button:|
 Implement script for the evaluation|:white_square_button:| 
