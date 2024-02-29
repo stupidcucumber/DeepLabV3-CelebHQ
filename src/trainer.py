@@ -69,24 +69,21 @@ class Trainer:
     def fit(self, train_loader: DataLoader, val_loader: DataLoader,
                  epochs: int):
         logger.info('Start fitting the model.')
-        data = {
-            'train_loss': 0,
-            'val_loss': 0,
-            'extra_train': dict(),
-            'extra_val' : dict()
-        }
         for epoch in range(epochs):
+            data = {
+                'extra_train': dict(),
+                'extra_val' : dict()
+            }
             for callback in self.callbacks:
                 callback.epoch_start(data=data)
             
             average_loss = self._compute_epoch(data=data, loader=train_loader, partition='train')
             logger.info('training', extra={'epoch': epoch, 'average_loss': average_loss})
-            data['train_loss'] = average_loss
+            data.pop('train_loss')
             
             with torch.no_grad():
                 average_loss = self._compute_epoch(data=data, loader=val_loader, partition='val')
                 logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
-                data['val_loss'] = average_loss
             
             for callback in self.callbacks:
                 callback.epoch_end(data=data)
