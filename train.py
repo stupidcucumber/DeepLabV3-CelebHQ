@@ -61,7 +61,9 @@ if __name__ == '__main__':
         AccuracyMeanEvaluator(name='accuracy',
                               mapping=args.mapping),
         PrecisionMeanEvaluator(name='precision',
-                               mapping=args.mapping)
+                               mapping=args.mapping),
+        RecallMeanEvaluator(name='recall',
+                            mapping=args.mapping)
     ]
     callbacks = [
         BestWeightsCallback(

@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torch import Tensor
 from .evaluator import MeanEvaluator
 from ..utils import decode
@@ -9,7 +10,13 @@ class RecallMeanEvaluator(MeanEvaluator):
         super(RecallMeanEvaluator, self).__init__(name=name, mapping=mapping)
 
     def _calculate_recall_layer(self, index: int, layer_predicted: Tensor, layer_true: Tensor) -> np.float32:
-        pass
+        true = torch.sum(layer_predicted[layer_true == index])
+        label_true = torch.sum(layer_true == index)
+        if label_true > 0:
+            recall = true / label_true
+        else:
+            recall = 1.0
+        return recall
 
     def calculate_value(self, logits: Tensor, labels: Tensor) -> dict[str, np.float32] | np.float32:
         _batch_num, _layer_num = logits.shape[:2]
