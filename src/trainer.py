@@ -74,8 +74,10 @@ class Trainer:
                 'extra_train': dict(),
                 'extra_val' : dict()
             }
+            callback_data = data.copy()
+            callback_data.update({'model': self.model})
             for callback in self.callbacks:
-                callback.epoch_start(data=data)
+                callback.epoch_start(data=callback_data)
             
             average_loss = self._compute_epoch(data=data, loader=train_loader, partition='train')
             logger.info('training', extra={'epoch': epoch, 'average_loss': average_loss})
@@ -85,7 +87,9 @@ class Trainer:
                 average_loss = self._compute_epoch(data=data, loader=val_loader, partition='val')
                 logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
             
+            callback_data = data.copy()
+            callback_data.update({'model': self.model})
             for callback in self.callbacks:
-                callback.epoch_end(data=data)
+                callback.epoch_end(data=callback_data)
 
         logger.info('Fitting has been ended.')
