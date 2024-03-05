@@ -37,7 +37,7 @@ Task name | Progress |
 Implement Tensorboard logging|:white_check_mark:|
 Implement callback for precision|:white_check_mark:|
 Implement callback for recall|:white_check_mark:|
-Implement script for the evaluation|:white_square_button:| 
+Implement script for the evaluation|:white_check_mark:| 
 Train weights and make them public|:white_square_button:|
 
 # Citations
