@@ -15,7 +15,7 @@ def create_model(output_channels: int = 1, weights: pathlib.Path | None = None):
         model = models.segmentation.deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1, progress=True, aux_loss=True)
         model.classifier = DeepLabHead(2048, output_channels)
     else:
-        model = torch.load(weights)
+        model = torch.load(weights, map_location=lambda loc, state: loc)
     model.eval()
     logger.info('Instantiated model.')
     return model
