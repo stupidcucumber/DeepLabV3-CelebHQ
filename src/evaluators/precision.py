@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torch import Tensor
 from .evaluator import MeanEvaluator
 from ..utils import decode
@@ -8,8 +9,14 @@ class PrecisionMeanEvaluator(MeanEvaluator):
     def __init__(self, name: str='precision', mapping: dict | None = None):
         super(PrecisionMeanEvaluator, self).__init__(name=name, mapping=mapping)
 
-    def _calculate_precision_layer(index: int, layer_predicted: Tensor, layer_true: Tensor) -> np.float32:
-        pass
+    def _calculate_precision_layer(self, index: int, layer_predicted: Tensor, layer_true: Tensor) -> np.float32:
+        true = torch.sum(layer_predicted[layer_true == index])
+        predicted = torch.sum(layer_predicted == 1)
+        if predicted > 0:
+            precision = true / predicted
+        else:
+            precision = 1.0
+        return precision
 
     def calculate_value(self, logits: Tensor, labels: Tensor) -> dict[str, np.float32] | np.float32:
         _batch_num, _layer_num = logits.shape[:2]

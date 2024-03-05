@@ -8,7 +8,7 @@ class RecallMeanEvaluator(MeanEvaluator):
     def __init__(self, name: str='recall', mapping: dict | None = None):
         super(RecallMeanEvaluator, self).__init__(name=name, mapping=mapping)
 
-    def _calculate_recall_layer(index: int, layer_predicted: Tensor, layer_true: Tensor) -> np.float32:
+    def _calculate_recall_layer(self, index: int, layer_predicted: Tensor, layer_true: Tensor) -> np.float32:
         pass
 
     def calculate_value(self, logits: Tensor, labels: Tensor) -> dict[str, np.float32] | np.float32:
