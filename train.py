@@ -2,7 +2,7 @@ import logging, logging.config
 import pathlib, json, argparse, gdown, zipfile, sys
 from src.utils import create_model, setup_data, setup_logging, seed_everything
 from src.data import SemanticDataset
-from src.evaluators import AccuracyMeanEvaluator
+from src.evaluators import AccuracyMeanEvaluator, PrecisionMeanEvaluator, RecallMeanEvaluator
 from src.callback import BestWeightsCallback, TensorboardCallback
 from src import Trainer
 import torch
@@ -59,7 +59,11 @@ if __name__ == '__main__':
     )
     evaluators = [
         AccuracyMeanEvaluator(name='accuracy',
-                              mapping=args.mapping)
+                              mapping=args.mapping),
+        PrecisionMeanEvaluator(name='precision',
+                               mapping=args.mapping),
+        RecallMeanEvaluator(name='recall',
+                            mapping=args.mapping)
     ]
     callbacks = [
         BestWeightsCallback(
