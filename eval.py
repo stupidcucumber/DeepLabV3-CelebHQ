@@ -12,10 +12,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mapping', type=pathlib.Path, required=True,
                         help='Path to the mapping')
-    parser.add_argument('--model', type=pathlib.Path, required=True,
+    parser.add_argument('--model', type=pathlib.Path, default=None,
                         help='Path to the model weights.')
     parser.add_argument('-i', '--input', type=pathlib.Path, required=True,
                         help='Path to the input image.')
+    parser.add_argument('-cmap', '--color-map', type=pathlib.Path, required=True,
+                        help='Path to the color map.')
     parser.add_argument('-o', '--output', type=pathlib.Path, default=pathlib.Path('output.png'),
                         help='Path to the result file.')
     return parser.parse_args()
@@ -34,7 +36,7 @@ def load_input(image_path: pathlib.Path) -> torch.Tensor:
     )
     image = cv2.imread(str(image_path))
     input = transform(image)
-    return input
+    return torch.unsqueeze(input, dim=0)
 
 
 def load_mapping(mapping_path: pathlib.Path) -> dict:
@@ -50,14 +52,16 @@ if __name__ == '__main__':
     input_image = load_input(image_path=args.input)
     logger.info('Loaded input image.')
     mapping = load_mapping(mapping_path=args.mapping)
+    color_map = load_mapping(mapping_path=args.color_map)
     logger.info('Loaded mapping')
     model = create_model(output_channels=len(mapping.keys()), weights=args.model)
     logger.info('Instantiated model.')
 
     logger.debug('Start inferencing.')
-    output = model(torch.as_tensor([input_image]))
+    model_output = model(input_image)
+    segmentation = model_output['out']
     logger.debug('Ended inferencing.')
-    output_image = construct_image(output=output, mapping=mapping)
+    output_image = construct_image(output=segmentation[0], mapping=mapping, color_mapping=color_map)
     logger.debug('Constructed image.')
     cv2.imwrite(str(args.output), output_image)
     logger.info('Saved image.')

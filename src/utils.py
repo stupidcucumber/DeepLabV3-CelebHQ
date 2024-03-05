@@ -1,6 +1,6 @@
 import logging
 import logging.config
-import pathlib, gdown, zipfile, json, random
+import pathlib, gdown, zipfile, json, random, cv2
 import torch
 import numpy as np
 from torchvision import models
@@ -10,9 +10,13 @@ from torchvision.models.segmentation.deeplabv3 import DeepLabV3_ResNet101_Weight
 logger = logging.getLogger('utils_loggers')
 
 
-def create_model(output_channels: int = 1):
-    model = models.segmentation.deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1, progrss=True)
-    model.classifier = DeepLabHead(2048, output_channels)
+def create_model(output_channels: int = 1, weights: pathlib.Path | None = None):
+    if not weights:
+        model = models.segmentation.deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1, progress=True, aux_loss=True)
+        model.classifier = DeepLabHead(2048, output_channels)
+    else:
+        model = torch.load(weights)
+    model.eval()
     logger.info('Instantiated model.')
     return model
 
@@ -61,3 +65,16 @@ def seed_everything(seed: int = 0):
     np.random.seed(seed=seed)
     torch.manual_seed(seed=seed)
     random.seed(seed)
+
+
+def construct_image(output: torch.Tensor, mapping: dict, color_mapping: dict) -> np.ndarray:
+    output_shape = (*output.shape[1:], 3)
+    image = np.zeros(shape=output_shape)
+    decoded_output = decode(logits=output)
+    for layer_index in mapping.keys():
+        index = int(layer_index)
+        _raw_layer = np.stack([decoded_output[index], decoded_output[index], decoded_output[index]]).transpose(1, 2, 0)
+        layer = _raw_layer * np.full(shape=output_shape, 
+                                     fill_value=color_mapping[layer_index])
+        image = image + layer
+    return image
