@@ -2,6 +2,8 @@ from torch.utils.data import DataLoader
 from torch.nn import Module
 import torch
 import logging
+from robustprinter import Printer
+from robustprinter.formatter import DefaultFormatter
 from .evaluators import MeanEvaluator
 from .callback import Callback
 
@@ -20,6 +22,28 @@ class Trainer:
         self.evaluators = evaluators
         self.callbacks = callbacks
         self.device = device
+        self.rprinter = Printer(formatter=DefaultFormatter(max_columns=4))
+
+    def _unroll_metrics(self, data: dict) -> dict:
+        result = dict()
+        for key, value in data.items():
+            if isinstance(value, dict):
+                result.update({
+                    ((key + '_') if not key.startswith('extra') else '') + inner_key: inner_value 
+                    for inner_key, inner_value in self._unroll_metrics(data=value).items()
+                })
+            else:
+                result[key] = value
+        return result
+
+    def _construct_data(self, epoch: int, partition: str, step: int, max_steps: int, extras: dict):
+        data = dict()
+        data['epoch'] = epoch
+        data['partition'] = partition
+        data['step'] = step
+        data['max_steps'] = max_steps
+        data['metrics'] = self._unroll_metrics(data=extras)
+        return data
 
     def _move_to_device(self, inputs: torch.Tensor, labels: torch.Tensor) -> list[torch.Tensor, torch.Tensor]:
         return inputs.to(self.device), labels.to(self.device)
@@ -44,12 +68,11 @@ class Trainer:
     def _evaluate(self, data: dict, logits: torch.Tensor, labels: torch.Tensor, partition: str = 'train'):
         for evaluator in self.evaluators:
             evaluator.append(logits=logits, labels=labels)
-            print('Results of %s' % evaluator.name, evaluator.get_result(), flush=True)
             data['extra_%s' % partition][evaluator.name] = evaluator.get_result()
     
-    def _compute_epoch(self, data: dict, loader: DataLoader, partition: str = 'train'):
+    def _compute_epoch(self, epoch: int, data: dict, loader: DataLoader, partition: str = 'train'):
         losses = []
-        for inputs, labels in loader:
+        for step, (inputs, labels) in enumerate(loader):
             for callback in self.callbacks:
                 callback.batch_start(data=data)
             inputs, labels = self._move_to_device(inputs=inputs, labels=labels)
@@ -60,8 +83,16 @@ class Trainer:
             losses.append(loss)
             average_loss = torch.mean(torch.as_tensor(losses, dtype=torch.float32))
             data['%s_loss' % partition] = loss
-            print('Loss is: ', average_loss, flush=True)
             self._evaluate(data=data, logits=logits, labels=labels, partition=partition)
+            self.rprinter.print(
+                data=self._construct_data(
+                    epoch=epoch, 
+                    partition=partition, 
+                    step=step,
+                    max_steps=len(loader),
+                    extras=data
+                )
+            )
             for callback in self.callbacks:
                 callback.batch_end(data=data)
         return average_loss
@@ -69,6 +100,7 @@ class Trainer:
     def fit(self, train_loader: DataLoader, val_loader: DataLoader,
                  epochs: int):
         logger.info('Start fitting the model.')
+        self.rprinter.start()
         for epoch in range(epochs):
             data = {
                 'extra_train': dict(),
@@ -79,12 +111,16 @@ class Trainer:
             for callback in self.callbacks:
                 callback.epoch_start(data=callback_data)
             
-            average_loss = self._compute_epoch(data=data, loader=train_loader, partition='train')
+            average_loss = self._compute_epoch(epoch=epoch, data=data, loader=train_loader, partition='train')
+            self.rprinter.break_loop()
+
             logger.info('training', extra={'epoch': epoch, 'average_loss': average_loss})
             data.pop('train_loss')
+            data.pop('extra_train')
             
             with torch.no_grad():
-                average_loss = self._compute_epoch(data=data, loader=val_loader, partition='val')
+                average_loss = self._compute_epoch(epoch=epoch, data=data, loader=val_loader, partition='val')
+                self.rprinter.break_loop()
                 logger.info('validating', extra={'epoch': epoch, 'average_loss': average_loss})
             
             callback_data = data.copy()
