@@ -6,6 +6,7 @@ services:
     volumes:
       - datasets:/app/datasets
       - runs:/app/runs
+      - logs:/app/logs
     deploy:
       resources:
         reservations:
@@ -14,7 +15,13 @@ services:
               count: 1
               capabilities: [gpu]
 
-volumes:
+volumes:  
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$PWD/logs"
   datasets:
     driver: local
     driver_opts:
