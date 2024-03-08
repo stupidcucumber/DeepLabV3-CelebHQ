@@ -35,8 +35,9 @@ def load_input(image_path: pathlib.Path) -> torch.Tensor:
         ]
     )
     image = cv2.imread(str(image_path))
+    shape = image.shape[:2][::-1]
     input = transform(image)
-    return torch.unsqueeze(input, dim=0)
+    return torch.unsqueeze(input, dim=0), shape
 
 
 def load_mapping(mapping_path: pathlib.Path) -> dict:
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     setup_logging()
     args = parse_arguments()
     
-    input_image = load_input(image_path=args.input)
+    input_image, init_shape = load_input(image_path=args.input)
     logger.info('Loaded input image.')
     mapping = load_mapping(mapping_path=args.mapping)
     color_map = load_mapping(mapping_path=args.color_map)
@@ -62,6 +63,7 @@ if __name__ == '__main__':
     segmentation = model_output['out']
     logger.debug('Ended inferencing.')
     output_image = construct_image(output=segmentation[0], mapping=mapping, color_mapping=color_map)
+    output_image = cv2.resize(output_image, dsize=init_shape)
     logger.debug('Constructed image.')
     cv2.imwrite(str(args.output), output_image)
     logger.info('Saved image.')

@@ -5,3 +5,4 @@
 *.csv
 datasets/*
 test*.ipynb
+runs/*.pt

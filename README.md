@@ -27,7 +27,17 @@ options:
 After starting the training CelebAMask-HQ dataset will be automatically downloaded. If there is any troubles with downloading using gdown you can access it on [Google Drive](https://drive.google.com/file/d/17e_IRjSuise59WUDHVrwZKES71KzJ9bU/view?usp=share_link). For usage you must unzip CelebAMask-HQ.zip into datasets/CelebAMask-HQ folder.
 
 ## Evaluation
-TBD
+To evaluate you need to download weights of the model from the [Google Drive](https://drive.google.com/file/d/1YR4LTi-CIYl8zr7JmtJj5jcrpdsJx9Nd/view?usp=share_link).
+For example inference use the following command:
+```
+python eval.py --mapping datasets/CelebAMask-HQ/mapping.json --model runs/best_weights.pt -i example/input.png -cmap example/color_mapping.json
+```
+
+Example of evaluation is:
+
+![Input](./example/input.png) ![Output](./example/output.png)
+
+In the future weights can be improved.
 
 # :warning: TODO :warning:
 This list will be updated throughout the time. Contributions are hugely appreciated!
@@ -38,7 +48,7 @@ Implement Tensorboard logging|:white_check_mark:|
 Implement callback for precision|:white_check_mark:|
 Implement callback for recall|:white_check_mark:|
 Implement script for the evaluation|:white_check_mark:| 
-Train weights and make them public|:white_square_button:|
+Train weights and make them public|:white_check_mark:|
 
 # Citations
 ```
